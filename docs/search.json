@@ -2,8 +2,22 @@
   {
     "objectID": "558Proj1.html",
     "href": "558Proj1.html",
-    "title": "Proj1",
+    "title": "ST 558 Project 1",
     "section": "",
-    "text": "Just setting stuff up! .qmd created"
+    "text": "library(httr)\nlibrary(jsonlite)\nlibrary(tidyverse)"
+  },
+  {
+    "objectID": "558Proj1.html#setup---loading-in-useful-packages",
+    "href": "558Proj1.html#setup---loading-in-useful-packages",
+    "title": "ST 558 Project 1",
+    "section": "",
+    "text": "library(httr)\nlibrary(jsonlite)\nlibrary(tidyverse)"
+  },
+  {
+    "objectID": "558Proj1.html#part-i-data-processing",
+    "href": "558Proj1.html#part-i-data-processing",
+    "title": "ST 558 Project 1",
+    "section": "Part I: Data Processing",
+    "text": "Part I: Data Processing\n\npums &lt;- function(url){\n  ## First, check year of URL to determine column names\n  if (grepl(\"2021|2022\", url)){\n    print(\"2021-2\")\n    colList &lt;- c(\"AGEP\", \"GASP\", \"GRPIP\", \"JWAP\", \"JWDP\", \"JWMNP\", \"PWGTP\", \"FER\",\n               \"HHL\", \"SCH\", \"SCHL\", \"SEX\", \"ST\", \"REGION\", \"DIVISION\")\n  } else {\n    print(\"2023-4\")\n    colList &lt;- c(\"AGEP\", \"GASP\", \"GRPIP\", \"JWAP\", \"JWDP\", \"JWMNP\", \"PWGTP\", \"FER\",\n                 \"HHL\", \"SCH\", \"SCHL\", \"SEX\", \"STATE\", \"REGION\", \"DIVISION\")\n  }\n  \n  getJson &lt;- GET(url)\n  parsed &lt;- fromJSON(rawToChar(getJson$content))\n  vars &lt;- as.list(parsed$variables)\n  \n  varSubset &lt;- vars[colList]\n  \n  return(varSubset)\n}\n\n\ndata2021 &lt;- pums(\"https://api.census.gov/data/2021/acs/acs1/pums/variables.json\")\n\n[1] \"2021-2\"\n\ndata2022 &lt;- pums(\"https://api.census.gov/data/2022/acs/acs1/pums/variables.json\")\n\n[1] \"2021-2\"\n\ndata2023 &lt;- pums(\"https://api.census.gov/data/2023/acs/acs1/pums/variables.json\")\n\n[1] \"2023-4\"\n\ndata2024 &lt;- pums(\"https://api.census.gov/data/2024/acs/acs1/pums/variables.json\")\n\n[1] \"2023-4\"\n\n\n\nsaveRDS(list(pums2021 = data2021, pums2022 = data2022, \n             pums2023 = data2023, pums2024 = data2024), file = \"data/pumsData.rds\")"
   }
 ]

@@ -1,11 +1,53 @@
 ---
-title: "Proj1"
+title: "ST 558 Project 1"
 format: html
+author: Cameron Mullaney
+date: today
 editor: visual
 ---
 
-### Just setting stuff up! .qmd created
+## Setup - loading in useful packages
 
 ```{r}
+#| warning: false
+library(httr)
+library(jsonlite)
+library(tidyverse)
+```
 
+## Part I: Data Processing
+
+```{r}
+pums <- function(url){
+  ## First, check year of URL to determine column names
+  if (grepl("2021|2022", url)){
+    print("2021-2")
+    colList <- c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER",
+               "HHL", "SCH", "SCHL", "SEX", "ST", "REGION", "DIVISION")
+  } else {
+    print("2023-4")
+    colList <- c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER",
+                 "HHL", "SCH", "SCHL", "SEX", "STATE", "REGION", "DIVISION")
+  }
+  
+  getJson <- GET(url)
+  parsed <- fromJSON(rawToChar(getJson$content))
+  vars <- as.list(parsed$variables)
+  
+  varSubset <- vars[colList]
+  
+  return(varSubset)
+}
+```
+
+```{r}
+data2021 <- pums("https://api.census.gov/data/2021/acs/acs1/pums/variables.json")
+data2022 <- pums("https://api.census.gov/data/2022/acs/acs1/pums/variables.json")
+data2023 <- pums("https://api.census.gov/data/2023/acs/acs1/pums/variables.json")
+data2024 <- pums("https://api.census.gov/data/2024/acs/acs1/pums/variables.json")
+```
+
+```{r}
+saveRDS(list(pums2021 = data2021, pums2022 = data2022, 
+             pums2023 = data2023, pums2024 = data2024), file = "data/pumsData.rds")
 ```
