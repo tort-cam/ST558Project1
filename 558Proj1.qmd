@@ -1,0 +1,11 @@
+---
+title: "Proj1"
+format: html
+editor: visual
+---
+
+### Just setting stuff up! .qmd created
+
+```{r}
+
+```

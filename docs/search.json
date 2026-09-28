@@ -1,23 +1,9 @@
 [
   {
-    "objectID": "rendering.html",
-    "href": "rendering.html",
-    "title": "Data Science First Impressions",
+    "objectID": "558Proj1.html",
+    "href": "558Proj1.html",
+    "title": "Proj1",
     "section": "",
-    "text": "What does it mean to be a data scientist?\nBeing a data scientist means being able to process data in a variety of different forms, and be familiar with the various ways that data can be stored, organized, and handled.\nWhat differences or similarities do you see between data scientists and statisticians?\nWhile there is a lot of overlap, data scientists have to know more about data storage and computer science, while statisticians have a greater focus on modeling and the associated math and methods. For each, knowing more about the other will increase their capability in their respective roles, but that isn’t strictly necessary.\nHow do you view yourself in relation to these two areas?\nI see myself as more of a statistician as opposed to a data scientist. I do not have an engineering or computer science background, so most of what I know in this field is from my personal hobbies (and ST554). That being said, I do believe that taking courses like this one, and familiarizing myself with more of the data scientist content will make me a better statistician."
-  },
-  {
-    "objectID": "rendering.html#questions-first",
-    "href": "rendering.html#questions-first",
-    "title": "Data Science First Impressions",
-    "section": "",
-    "text": "What does it mean to be a data scientist?\nBeing a data scientist means being able to process data in a variety of different forms, and be familiar with the various ways that data can be stored, organized, and handled.\nWhat differences or similarities do you see between data scientists and statisticians?\nWhile there is a lot of overlap, data scientists have to know more about data storage and computer science, while statisticians have a greater focus on modeling and the associated math and methods. For each, knowing more about the other will increase their capability in their respective roles, but that isn’t strictly necessary.\nHow do you view yourself in relation to these two areas?\nI see myself as more of a statistician as opposed to a data scientist. I do not have an engineering or computer science background, so most of what I know in this field is from my personal hobbies (and ST554). That being said, I do believe that taking courses like this one, and familiarizing myself with more of the data scientist content will make me a better statistician."
-  },
-  {
-    "objectID": "rendering.html#code-second",
-    "href": "rendering.html#code-second",
-    "title": "Data Science First Impressions",
-    "section": "Code second!",
-    "text": "Code second!\nData!\n\ny &lt;- density(iris$Petal.Width)\n\nLet’s take a look at this “Petal.Width” data’s characteristics:\n\ncat(\"Class:\", class(y),\n    \"\\nType :\", typeof(y), \n    \"\\nStructure : ==================================\\n\")\n\nClass: density \nType : list \nStructure : ==================================\n\nstr(y)\n\nList of 8\n $ x         : num [1:512] -0.656 -0.648 -0.64 -0.633 -0.625 ...\n $ y         : num [1:512] 0.00161 0.00178 0.00197 0.00217 0.00239 ...\n $ bw        : num 0.252\n $ n         : int 150\n $ old.coords: logi FALSE\n $ call      : language density.default(x = iris$Petal.Width)\n $ data.name : chr \"iris$Petal.Width\"\n $ has.na    : logi FALSE\n - attr(*, \"class\")= chr \"density\"\n\ncat(\"==============================================\")\n\n==============================================\n\n\nNow, let’s plot it:"
+    "text": "Just setting stuff up! .qmd created"
   }
 ]
