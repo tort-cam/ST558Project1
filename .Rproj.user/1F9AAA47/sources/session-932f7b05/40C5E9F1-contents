@@ -1,0 +1,175 @@
+---
+title: "ST 558 Project 1"
+format: html
+author: Cameron Mullaney
+date: today
+editor: visual
+---
+
+## Setup - loading in useful packages
+Also loading in my API key 
+
+```{r}
+#| warning: false
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(lubridate)
+
+APIkey <- "3e4e9dd9b93b8546b5de301ae8c11506545540b9"
+
+```
+
+## Part I: Data Processing
+
+### Parsing Variable Values
+
+#### Variables Query Function
+
+```{r}
+pums <- function(url){
+  ## First, check year of URL to determine column names
+  if (grepl("2021|2022", url)){
+    print("2021-2")
+    colList <- c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER",
+               "HHL", "SCH", "SCHL", "SEX", "ST", "REGION", "DIVISION")
+  } else {
+    print("2023-4")
+    colList <- c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER",
+                 "HHL", "SCH", "SCHL", "SEX", "STATE", "REGION", "DIVISION")
+  }
+  
+  getJson <- GET(url)
+  parsed <- fromJSON(rawToChar(getJson$content))
+  vars <- as.list(parsed$variables)
+  
+  varSubset <- vars[colList]
+  
+  return(varSubset)
+}
+```
+
+Running `pums()` and saving results to .rds file in repository
+
+```{r}
+#| results: hold
+data2021 <- pums("https://api.census.gov/data/2021/acs/acs1/pums/variables.json")
+data2022 <- pums("https://api.census.gov/data/2022/acs/acs1/pums/variables.json")
+data2023 <- pums("https://api.census.gov/data/2023/acs/acs1/pums/variables.json")
+data2024 <- pums("https://api.census.gov/data/2024/acs/acs1/pums/variables.json")
+```
+
+```{r}
+saveRDS(list(pums2021 = data2021, pums2022 = data2022, 
+             pums2023 = data2023, pums2024 = data2024), file = "data/pumsData.rds")
+```
+
+### Parsing API Data
+
+#### Functions
+
+##### Tibble helper
+
+```{r}
+tibblehelper <- function(rawinput){
+  a <- fromJSON(rawToChar(rawinput$content))
+  as.data.frame(a[-1, , drop = FALSE], stringsAsFactors = FALSE) |>
+    setNames(a[1, ]) |>
+    as_tibble()
+}
+```
+
+```{r}
+## TESTING
+######### TIBBLE VARS ###########
+year <- 2024
+num_vars <- c("AGEP", "PWGTP")
+cat_vars <- "SEX"
+geo_level <- "state"
+geo_value <- "06"
+geo_api <- geo_value
+
+########## TIME VARS ############
+
+
+
+rawinput <- GET(paste0("https://api.census.gov/data/", year, "/acs/acs1/pums"),
+              query = list(get = paste(c(num_vars, cat_vars), collapse = ","),
+                           `for` = paste0(geo_level, ":", geo_api),
+                           key = APIkey))
+
+test <- tibblehelper(rawinput)
+```
+
+##### Time parsing
+
+For this sub-section an LLM was used to assist in function writing. I have worked through the code thoroughly and understand what it is doing. I have written all code comments
+
+```{r}
+time_calc <- function(label) {
+  '
+  This function will return either the midpoint of a provided time range.
+  If the provided label is missing a time, an NA time is returned
+  '
+  ### This runs once per element
+  
+  map_vec(label, function(x) {
+    
+    if (is.na(x) || !str_detect(x, " to ")) return(hms::as_hms(NA))
+    
+    ## Split time range into two values, make am/pms uniform
+    
+    parts <- str_split_1(x, " to ") |>
+      str_replace_all("a\\.m\\.", "AM") |>
+      str_replace_all("p\\.m\\.", "PM")
+    
+    ## Parse each piece into date/time, check for NA here too
+    
+    t <- parse_date_time(parts, orders = c("I:M p", "I p"), quiet = TRUE)
+    if (any(is.na(t))) return(hms::as_hms(NA))
+    
+    ## Check if the interval goes past midnight, adjust accordingly
+    
+    if (t[2] < t[1]) t[2] <- t[2] + days(1)  
+    
+    ## Compute midpoint, and convert to proper format
+    
+    mid <- t[1] + (t[2] - t[1]) / 2
+    hms::as_hms(as.numeric(difftime(mid, floor_date(t[1], "day"),
+                                    units = "secs")) %% 86400)
+  })
+}
+```
+
+##### Everything function - DOES NOT WORK YET
+
+```{r}
+pums2 <- function(year = 2024){
+  key <- ""
+  ## First, check year of URL to determine column names
+  if (year == 2021 || year == 2022){
+    print("2021-2")
+    colList <- c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER",
+               "HHL", "SCH", "SCHL", "SEX", "ST", "REGION", "DIVISION")
+  } else if (year == 2023 || year == 2024) {
+    print("2023-4")
+    colList <- c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER",
+                 "HHL", "SCH", "SCHL", "SEX", "STATE", "REGION", "DIVISION")
+  } else stop ("Year must be 2021-2024")
+  
+  getJson <- GET(paste0("https://api.census.gov/data/", year, "/acs/acs1/pums"),
+                 query = list(get = paste(colList, collapse = ","),
+                              `for` = paste0("state:", state),
+                              key = Sys.getenv("key")),
+                 timeout(180))
+  
+  parsed <- fromJSON(rawToChar(getJson$content))
+  vars <- as_tibble(parsed$data)
+  
+  varSubset <- vars[colList]
+  
+  return(varSubset)
+}
+```
+
+
