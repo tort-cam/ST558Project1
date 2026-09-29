@@ -6,8 +6,9 @@ date: today
 editor: visual
 ---
 
-## Setup - loading in useful packages
-Also loading in my API key 
+# Setup
+
+Loading in some packages I'll need, as well as my API key
 
 ```{r}
 #| warning: false
@@ -20,11 +21,13 @@ APIkey <- "3e4e9dd9b93b8546b5de301ae8c11506545540b9"
 
 ```
 
-## Part I: Data Processing
+# Part I: Data Processing
 
-### Parsing Variable Values
+## Parsing Variable Values
 
-#### Variables Query Function
+### Variables Query Function
+
+This function uses the PUMS API to pull in the list of census variables from a given year, as well as features of those variables (range, data type, etc.)
 
 ```{r}
 pums <- function(url){
@@ -39,6 +42,7 @@ pums <- function(url){
                  "HHL", "SCH", "SCHL", "SEX", "STATE", "REGION", "DIVISION")
   }
   
+  ## Then, pull in variable info, parse to JSON, and return subsetted list
   getJson <- GET(url)
   parsed <- fromJSON(rawToChar(getJson$content))
   vars <- as.list(parsed$variables)
@@ -61,14 +65,14 @@ data2024 <- pums("https://api.census.gov/data/2024/acs/acs1/pums/variables.json"
 
 ```{r}
 saveRDS(list(pums2021 = data2021, pums2022 = data2022, 
-             pums2023 = data2023, pums2024 = data2024), file = "data/pumsData.rds")
+             pums2023 = data2023, pums2024 = data2024), file = "data/pumsVars.rds")
 ```
 
-### Parsing API Data
+## Parsing API Data
 
-#### Functions
+### Functions
 
-##### Tibble helper
+#### Function 1: Query to tibble (helper)
 
 ```{r}
 tibblehelper <- function(rawinput){
@@ -79,31 +83,9 @@ tibblehelper <- function(rawinput){
 }
 ```
 
-```{r}
-## TESTING
-######### TIBBLE VARS ###########
-year <- 2024
-num_vars <- c("AGEP", "PWGTP")
-cat_vars <- "SEX"
-geo_level <- "state"
-geo_value <- "06"
-geo_api <- geo_value
+#### Function 2: Time parsing (helper)
 
-########## TIME VARS ############
-
-
-
-rawinput <- GET(paste0("https://api.census.gov/data/", year, "/acs/acs1/pums"),
-              query = list(get = paste(c(num_vars, cat_vars), collapse = ","),
-                           `for` = paste0(geo_level, ":", geo_api),
-                           key = APIkey))
-
-test <- tibblehelper(rawinput)
-```
-
-##### Time parsing
-
-For this sub-section an LLM was used to assist in function writing. I have worked through the code thoroughly and understand what it is doing. I have written all code comments
+*For this sub-section an LLM was used to assist in function writing.*
 
 ```{r}
 time_calc <- function(label) {
@@ -111,13 +93,15 @@ time_calc <- function(label) {
   This function will return either the midpoint of a provided time range.
   If the provided label is missing a time, an NA time is returned
   '
-  ### This runs once per element
+  ### Runs once per element
+  label <- as.character(label)
+  u <- unique(label)
   
-  map_vec(label, function(x) {
+  mids <- map_dbl(u, function(x) {
     
-    if (is.na(x) || !str_detect(x, " to ")) return(hms::as_hms(NA))
+    if (is.na(x) || !str_detect(x, " to ")) return(NA_real_)
     
-    ## Split time range into two values, make am/pms uniform
+    ## Split time range into two values, make am/pm inidcators uniform
     
     parts <- str_split_1(x, " to ") |>
       str_replace_all("a\\.m\\.", "AM") |>
@@ -126,7 +110,7 @@ time_calc <- function(label) {
     ## Parse each piece into date/time, check for NA here too
     
     t <- parse_date_time(parts, orders = c("I:M p", "I p"), quiet = TRUE)
-    if (any(is.na(t))) return(hms::as_hms(NA))
+    if (any(is.na(t))) return(NA_real_)
     
     ## Check if the interval goes past midnight, adjust accordingly
     
@@ -135,46 +119,151 @@ time_calc <- function(label) {
     ## Compute midpoint, and convert to proper format
     
     mid <- t[1] + (t[2] - t[1]) / 2
-    hms::as_hms(as.numeric(difftime(mid, floor_date(t[1], "day"),
-                                    units = "secs")) %% 86400)
+    as.numeric(difftime(mid, floor_date(t[1], "day"), units = "secs")) %% 86400
   })
+  
+  hms::as_hms(mids[match(label, u)])
 }
 ```
 
+#### Big parsing function
+
+This function will query the PUMS API, and allows a user to specify what variables they want to pull in. In addition, the user must supply an API key. Both `tibblehelper()` and `time_calc()` are used. The .rds file from earlier is used to pull in the proper variable values, and properly label the final tibble output.
+
 ```{r}
-time_calc(c("11:58 p.m. to 12:02 a.m.",   # crosses midnight -> 00:00:00
-                "12:00 a.m. to 12:04 a.m."))  # midnight start   -> 00:02:00
+pums2 <- function(year = 2024,
+                  num_vars = c("AGEP", "PWGTP"),
+                  cat_vars = "SEX",
+                  geo_level = "state",
+                  geo_value = "01",
+                  API_key = "") {
+  
+  
+  levels_list <- readRDS("data/pumsVars.rds")
+  
+  ## Lists of acceptable column names
+  
+  numlist <- c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP")
+  catlist <- c("FER", "HHL", "SCH", "SCHL", "SEX")
+  num_vars <- union("PWGTP", num_vars)
+  
+  ### Check column names
+  
+  if (!all(num_vars %in% numlist)) stop("Invalid numeric variable")
+  if (!all(cat_vars %in% catlist)) stop("Invalid categorical variable")
+  
+  if (length(setdiff(num_vars, "PWGTP")) < 1)
+    stop("Need at least one numeric variable besides PWGTP")
+  
+  if (length(cat_vars) < 1) stop("Need at least one categorical variable")
+  
+  ## Check for proper year
+  
+  if (length(year) != 1 || !year %in% 2021:2024)
+    stop("Must provide a single year within 2021-2024")
+  
+  ## Check for API key
+  if (API_key == "")
+    stop("No API key provided")
+  
+  ## Check geography level
+  if (length(geo_level) != 1 || !geo_level %in% c("state", "division", "region"))
+    stop("geo_level must be state, division, or region")
+  
+  ## Check geo value, set geo_api based on geo_value input
+  if (length(geo_value) != 1) stop("geo_value must be a single value (or 'all')")
+  geo_api <- if (tolower(geo_value) == "all") "*" else geo_value
+  
+  ## Finally! Query time
+  
+  querypull <- GET(paste0("https://api.census.gov/data/", year, "/acs/acs1/pums"),
+              query = list(get = paste(c(num_vars, cat_vars), collapse = ","),
+                           `for` = paste0(geo_level, ":", geo_api),
+                           key = API_key))
+  out <- tibblehelper(querypull)
+  
+  ## Separate numeric cols into plain numeric cols and time cols
+  ## Applies as.numeric to the correct columns
+  
+  plain_numbers <- intersect(num_vars, c("AGEP", "GASP", "GRPIP", "JWMNP", "PWGTP"))
+  out <- out |> mutate(across(all_of(plain_numbers), as.numeric))
+  
+  ## Time variables: 
+  
+  for (v in intersect(num_vars, c("JWAP", "JWDP"))) {
+    
+    lk <- unlist(levels_list[[paste0("pums", year)]][[v]][["values"]][["item"]])
+    lab <- lk[match(as.integer(out[[v]]), as.integer(names(lk)))]
+    out[[v]] <- time_calc(unname(lab))
+  }
+  
+  ## Categorical variables -> factors with labels from the .rds
+  for (v in cat_vars) {
+    
+    lv <- levels_list[[paste0("pums", as.character(year))]][[v]][["values"]][["item"]]
+    out[[v]] <- factor(out[[v]], levels = names(lv), labels = unname(lv))
+  }
+
+  class(out) <- c("census", class(out))
+  out  
+  }
 ```
 
-##### Everything function - DOES NOT WORK YET
+Trying it out! More columns slows it down, but it works!
 
 ```{r}
-pums2 <- function(year = 2024){
-  key <- ""
-  ## First, check year of URL to determine column names
-  if (year == 2021 || year == 2022){
-    print("2021-2")
-    colList <- c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER",
-               "HHL", "SCH", "SCHL", "SEX", "ST", "REGION", "DIVISION")
-  } else if (year == 2023 || year == 2024) {
-    print("2023-4")
-    colList <- c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER",
-                 "HHL", "SCH", "SCHL", "SEX", "STATE", "REGION", "DIVISION")
-  } else stop ("Year must be 2021-2024")
+attempt <- pums2(year = 2022, 
+                 num_vars = c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP"), 
+                 cat_vars = c("FER", "HHL", "SCH", "SCHL", "SEX"), 
+                 geo_level = "region", 
+                 geo_value = "all", 
+                 API_key = APIkey)
+```
+
+#### Combining years
+
+This function will loop `pums2()` over a list of years provided, producing a final tibble with data from multiple years.
+
+```{r}
+
+combo <- function(years = c(2021:2024),
+                  num_vars = c("AGEP", "PWGTP"),
+                  cat_vars = "SEX",
+                  geo_level = "state",
+                  geo_value = "01",
+                  API_key = ""){
   
-  getJson <- GET(paste0("https://api.census.gov/data/", year, "/acs/acs1/pums"),
-                 query = list(get = paste(colList, collapse = ","),
-                              `for` = paste0("state:", state),
-                              key = Sys.getenv("key")),
-                 timeout(180))
+  ## Initialize empty tibble
+  bigList <- tibble()
   
-  parsed <- fromJSON(rawToChar(getJson$content))
-  vars <- as_tibble(parsed$data)
+  cat("year \t rows\n")
+  for (i in years){
+    temp <- pums2(year = i, 
+                  num_vars = num_vars, 
+                  cat_vars = cat_vars,
+                  geo_level = geo_level,
+                  geo_value = geo_value,
+                  API_key = API_key)
+    
+    ## Add year column
+    temp <- temp |> add_column(year = i)
+    
+    bigList <- bind_rows(bigList, temp)
+    
+    ## Print number of rows in each year
+    cat(i, "\t", nrow(temp), "\n")
+  }
   
-  varSubset <- vars[colList]
+  return(bigList)
   
-  return(varSubset)
 }
 ```
 
+Testing it out - Functional!
 
+```{r}
+test <- combo(years = c(2021: 2023), API_key = APIkey)
+
+```
+
+# Part II: Writing a Generic Function for Summarizing
