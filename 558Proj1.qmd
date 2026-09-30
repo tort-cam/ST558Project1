@@ -213,10 +213,10 @@ Trying it out! More columns slows it down, but it works!
 
 ```{r}
 attempt <- pums2(year = 2022, 
-                 num_vars = c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP"), 
-                 cat_vars = c("FER", "HHL", "SCH", "SCHL", "SEX"), 
-                 geo_level = "region", 
-                 geo_value = "all", 
+                 num_vars = c("AGEP", "JWDP", "PWGTP"), 
+                 cat_vars = c("SCHL", "SEX"), 
+                 geo_level = "state", 
+                 geo_value = "05", 
                  API_key = APIkey)
 ```
 
@@ -246,7 +246,7 @@ combo <- function(years = c(2021:2024),
                   API_key = API_key)
     
     ## Add year column
-    temp <- temp |> add_column(year = i)
+    temp <- temp |> add_column(YEAR = as.factor(i))
     
     bigList <- bind_rows(bigList, temp)
     
@@ -254,6 +254,7 @@ combo <- function(years = c(2021:2024),
     cat(i, "\t", nrow(temp), "\n")
   }
   
+  class(bigList) <- c("census", class(bigList))
   return(bigList)
   
 }
@@ -262,8 +263,121 @@ combo <- function(years = c(2021:2024),
 Testing it out - Functional!
 
 ```{r}
-test <- combo(years = c(2021: 2023), API_key = APIkey)
+test <- combo(years = c(2021: 2024), 
+              num_vars = c("AGEP", "GASP", "GRPIP", "JWMNP", "PWGTP"),
+              catlist <- c("FER", "HHL", "SCH", "SCHL", "SEX"),
+              API_key = APIkey)
 
 ```
 
-# Part II: Writing a Generic Function for Summarizing
+# Part II: Writing Generic Functions for Summarizing
+
+## Numeric Summaries
+
+This function will take in the output from `pums2()` or `combo()`, and based on input arguments give you a list of variable summaries. This is an addition to the normal `summary()` function, which will only jump into action if the object you call `summary()` on is of data type "census", which is assigned to outputs from the aforementioned PUMS query functions.
+
+```{r}
+summary.census <- function(data, 
+                        num_vars = c("AGEP", "GASP", "GRPIP", "JWMNP"),
+                        cat_vars = if("YEAR" %in% colnames(data)) 
+                                      c("FER", "HHL", "SCH", "SCHL", "SEX", "YEAR")
+                                      else c("FER", "HHL", "SCH", "SCHL", "SEX")){
+  
+  ## Read in the label list
+  label_list <- readRDS("data/pumsVars.rds")$pums2021
+
+  ## Define the columns to calculate, based on double intersect of:
+  ##    cols in provided df, 
+  ##    cols provided in num_vars / cat_vars
+  ##    list of all potential numeric & categorical variables
+  
+  plain_numbers <- intersect(intersect(num_vars, 
+                                       c("AGEP", "GASP", "GRPIP", "JWMNP")),
+                             colnames(data))
+  cat_to_summarize <- intersect(intersect(cat_vars, 
+                                          c("FER", "HHL", "SCH", "SCHL", "SEX", "YEAR")), 
+                                colnames(data))
+  
+  ## Initialize empty output list
+  out_list <- list()
+
+  ## For numeric cols, create a tibble of each variable's mean & SD
+  ## Then, append that tibble to out_list
+  ## Pull column label from label list
+  for (var in plain_numbers){
+    name <- label_list[[var]][["label"]]
+    
+    temp <- tibble(
+      mean = sum(data[var]*data["PWGTP"])/sum(data["PWGTP"]),
+      sd = sqrt(sum(data[var]^2*data["PWGTP"])/sum(data["PWGTP"])-mean^2))
+    
+    out_list[[name]] <- temp
+    
+  }
+
+  ## For categorical cols, use dplyr to get counts for each response
+  ## Append that tibble to out_list
+  ## Pull column label from label list
+  
+  for (var in cat_to_summarize){
+    
+    ## Year isn't in label list, this if() accounts for that
+    if (var == "YEAR"){
+      name <- "YEAR"
+    } else {
+    name <- label_list[[var]][["label"]]
+    }
+    
+    temp <- data |>
+      group_by(.data[[var]])|>
+      summarise(count = n())
+    out_list[[name]] <- temp
+    
+  }
+
+    return(out_list)    
+}
+```
+
+Let's test out the summary! In Rstudio it's hard to interpret the output, but upon rendering to html it looks good!
+
+```{r}
+summarized_list <- summary(test)
+summarized_list
+```
+
+## Graphical Summaries
+
+This function, like the last, is an addition to the normal `plot()` function, which only activates when something of data type "census" is provided. It recieves the census data, as well as the name of one numeric and one categorical column, and makes a `ggplot()` boxplot based on those arguments.
+
+```{r}
+plot.census <- function(data, num_var, cat_var){
+  
+  ## Read in label list for final plot printing
+  label_list <- readRDS("data/pumsVars.rds")$pums2021
+  
+  ## Extract numeric and categorical labels from label_list
+  ## Again, checking for YEAR specifically
+  num_name <- label_list[[num_var]][["label"]]
+  cat_name <- if(cat_var == "YEAR"){"Year"} 
+              else{label_list[[cat_var]][["label"]]}
+  
+  ## Plotting, specifying weights (PWGTP) from census data, and axis titles from label_list
+  ggplot(data, aes(x = get(cat_var), y = get(num_var), weight = PWGTP))+
+    geom_boxplot()+
+    labs(title = paste0(num_name, " by ", cat_name),
+         x = cat_name, 
+         y = num_name)
+}
+```
+
+```{r}
+plot(test, "JWMNP", "SCHL")
+```
+
+```{r}
+ggplot(test, aes(x = YEAR, y = GASP, weight = PWGTP))+
+  geom_boxplot()
+
+
+```

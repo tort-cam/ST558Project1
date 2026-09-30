@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Cameron Mullaney">
-<meta name="dcterms.date" content="2026-09-29">
+<meta name="dcterms.date" content="2026-09-30">
 
 <title>ST 558 Project 1</title>
 <style>
@@ -140,7 +140,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 29, 2026</p>
+      <p class="date">September 30, 2026</p>
     </div>
   </div>
   
@@ -354,10 +354,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Trying it out! More columns slows it down, but it works!</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>attempt <span class="ot">&lt;-</span> <span class="fu">pums2</span>(<span class="at">year =</span> <span class="dv">2022</span>, </span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">num_vars =</span> <span class="fu">c</span>(<span class="st">"AGEP"</span>, <span class="st">"GASP"</span>, <span class="st">"GRPIP"</span>, <span class="st">"JWAP"</span>, <span class="st">"JWDP"</span>, <span class="st">"JWMNP"</span>, <span class="st">"PWGTP"</span>), </span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">cat_vars =</span> <span class="fu">c</span>(<span class="st">"FER"</span>, <span class="st">"HHL"</span>, <span class="st">"SCH"</span>, <span class="st">"SCHL"</span>, <span class="st">"SEX"</span>), </span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">geo_level =</span> <span class="st">"region"</span>, </span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">geo_value =</span> <span class="st">"all"</span>, </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">num_vars =</span> <span class="fu">c</span>(<span class="st">"AGEP"</span>, <span class="st">"JWDP"</span>, <span class="st">"PWGTP"</span>), </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">cat_vars =</span> <span class="fu">c</span>(<span class="st">"SCHL"</span>, <span class="st">"SEX"</span>), </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">geo_level =</span> <span class="st">"state"</span>, </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">geo_value =</span> <span class="st">"05"</span>, </span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">API_key =</span> APIkey)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
@@ -385,7 +385,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>                  <span class="at">API_key =</span> API_key)</span>
 <span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Add year column</span></span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    temp <span class="ot">&lt;-</span> temp <span class="sc">|&gt;</span> <span class="fu">add_column</span>(<span class="at">year =</span> i)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    temp <span class="ot">&lt;-</span> temp <span class="sc">|&gt;</span> <span class="fu">add_column</span>(<span class="at">YEAR =</span> <span class="fu">as.factor</span>(i))</span>
 <span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    bigList <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(bigList, temp)</span>
 <span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    </span>
@@ -393,28 +393,240 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(i, <span class="st">"</span><span class="sc">\t</span><span class="st">"</span>, <span class="fu">nrow</span>(temp), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
 <span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(bigList)</span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(bigList) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"census"</span>, <span class="fu">class</span>(bigList))</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(bigList)</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Testing it out - Functional!</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> <span class="fu">combo</span>(<span class="at">years =</span> <span class="fu">c</span>(<span class="dv">2021</span><span class="sc">:</span> <span class="dv">2023</span>), <span class="at">API_key =</span> APIkey)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> <span class="fu">combo</span>(<span class="at">years =</span> <span class="fu">c</span>(<span class="dv">2021</span><span class="sc">:</span> <span class="dv">2024</span>), </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">num_vars =</span> <span class="fu">c</span>(<span class="st">"AGEP"</span>, <span class="st">"GASP"</span>, <span class="st">"GRPIP"</span>, <span class="st">"JWMNP"</span>, <span class="st">"PWGTP"</span>),</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>              catlist <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"FER"</span>, <span class="st">"HHL"</span>, <span class="st">"SCH"</span>, <span class="st">"SCHL"</span>, <span class="st">"SEX"</span>),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">API_key =</span> APIkey)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>year     rows
 2021     49647 
 2022     51580 
-2023     53020 </code></pre>
+2023     53020 
+2024     53710 </code></pre>
 </div>
 </div>
 </section>
 </section>
 </section>
 </section>
-<section id="part-ii-writing-a-generic-function-for-summarizing" class="level1">
-<h1>Part II: Writing a Generic Function for Summarizing</h1>
+<section id="part-ii-writing-generic-functions-for-summarizing" class="level1">
+<h1>Part II: Writing Generic Functions for Summarizing</h1>
+<section id="numeric-summaries" class="level2">
+<h2 class="anchored" data-anchor-id="numeric-summaries">Numeric Summaries</h2>
+<p>This function will take in the output from <code>pums2()</code> or <code>combo()</code>, and based on input arguments give you a list of variable summaries. This is an addition to the normal <code>summary()</code> function, which will only jump into action if the object you call <code>summary()</code> on is of data type “census”, which is assigned to outputs from the aforementioned PUMS query functions.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>summary.census <span class="ot">&lt;-</span> <span class="cf">function</span>(data, </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">num_vars =</span> <span class="fu">c</span>(<span class="st">"AGEP"</span>, <span class="st">"GASP"</span>, <span class="st">"GRPIP"</span>, <span class="st">"JWMNP"</span>),</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">cat_vars =</span> <span class="cf">if</span>(<span class="st">"YEAR"</span> <span class="sc">%in%</span> <span class="fu">colnames</span>(data)) </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                                      <span class="fu">c</span>(<span class="st">"FER"</span>, <span class="st">"HHL"</span>, <span class="st">"SCH"</span>, <span class="st">"SCHL"</span>, <span class="st">"SEX"</span>, <span class="st">"YEAR"</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                                      <span class="cf">else</span> <span class="fu">c</span>(<span class="st">"FER"</span>, <span class="st">"HHL"</span>, <span class="st">"SCH"</span>, <span class="st">"SCHL"</span>, <span class="st">"SEX"</span>)){</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Read in the label list</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  label_list <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/pumsVars.rds"</span>)<span class="sc">$</span>pums2021</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Define the columns to calculate, based on double intersect of:</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="do">##    cols in provided df, </span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="do">##    cols provided in num_vars / cat_vars</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="do">##    list of all potential numeric &amp; categorical variables</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  plain_numbers <span class="ot">&lt;-</span> <span class="fu">intersect</span>(<span class="fu">intersect</span>(num_vars, </span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>                                       <span class="fu">c</span>(<span class="st">"AGEP"</span>, <span class="st">"GASP"</span>, <span class="st">"GRPIP"</span>, <span class="st">"JWMNP"</span>)),</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">colnames</span>(data))</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  cat_to_summarize <span class="ot">&lt;-</span> <span class="fu">intersect</span>(<span class="fu">intersect</span>(cat_vars, </span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>                                          <span class="fu">c</span>(<span class="st">"FER"</span>, <span class="st">"HHL"</span>, <span class="st">"SCH"</span>, <span class="st">"SCHL"</span>, <span class="st">"SEX"</span>, <span class="st">"YEAR"</span>)), </span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">colnames</span>(data))</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Initialize empty output list</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  out_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  <span class="do">## For numeric cols, create a tibble of each variable's mean &amp; SD</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Then, append that tibble to out_list</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Pull column label from label list</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (var <span class="cf">in</span> plain_numbers){</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    name <span class="ot">&lt;-</span> label_list[[var]][[<span class="st">"label"</span>]]</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    temp <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>      <span class="at">mean =</span> <span class="fu">sum</span>(data[var]<span class="sc">*</span>data[<span class="st">"PWGTP"</span>])<span class="sc">/</span><span class="fu">sum</span>(data[<span class="st">"PWGTP"</span>]),</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">sd =</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(data[var]<span class="sc">^</span><span class="dv">2</span><span class="sc">*</span>data[<span class="st">"PWGTP"</span>])<span class="sc">/</span><span class="fu">sum</span>(data[<span class="st">"PWGTP"</span>])<span class="sc">-</span>mean<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>    out_list[[name]] <span class="ot">&lt;-</span> temp</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>  <span class="do">## For categorical cols, use dplyr to get counts for each response</span></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Append that tibble to out_list</span></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Pull column label from label list</span></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (var <span class="cf">in</span> cat_to_summarize){</span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Year isn't in label list, this if() accounts for that</span></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (var <span class="sc">==</span> <span class="st">"YEAR"</span>){</span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>      name <span class="ot">&lt;-</span> <span class="st">"YEAR"</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>    name <span class="ot">&lt;-</span> label_list[[var]][[<span class="st">"label"</span>]]</span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>    temp <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>      <span class="fu">group_by</span>(.data[[var]])<span class="sc">|&gt;</span></span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summarise</span>(<span class="at">count =</span> <span class="fu">n</span>())</span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>    out_list[[name]] <span class="ot">&lt;-</span> temp</span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(out_list)    </span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Let’s test out the summary! In Rstudio it’s hard to interpret the output, but upon rendering to html it looks good!</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>summarized_list <span class="ot">&lt;-</span> <span class="fu">summary</span>(test)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>summarized_list</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$Age
+# A tibble: 1 × 2
+   mean    sd
+  &lt;dbl&gt; &lt;dbl&gt;
+1  39.8  23.5
+
+$`Gas cost (monthly cost, use ADJHSG to adjust GASP to constant dollars)`
+# A tibble: 1 × 2
+   mean    sd
+  &lt;dbl&gt; &lt;dbl&gt;
+1  43.6  109.
+
+$`Gross rent as a percentage of household income past 12 months`
+# A tibble: 1 × 2
+   mean    sd
+  &lt;dbl&gt; &lt;dbl&gt;
+1  8.60  20.6
+
+$`Travel time to work`
+# A tibble: 1 × 2
+   mean    sd
+  &lt;dbl&gt; &lt;dbl&gt;
+1  10.3  18.5
+
+$`Gave birth to child within the past 12 months`
+# A tibble: 3 × 2
+  FER                                                   count
+  &lt;fct&gt;                                                 &lt;int&gt;
+1 N/A (less than 15 years/greater than 50 years/ male) 165122
+2 No                                                    40690
+3 Yes                                                    2145
+
+$`Household language`
+# A tibble: 6 × 2
+  HHL                                 count
+  &lt;fct&gt;                               &lt;int&gt;
+1 N/A (GQ/vacant)                     13321
+2 Spanish                              8046
+3 Other Indo-European languages        2674
+4 English Only                       180538
+5 Asian and Pacific Island languages   2572
+6 Other Language                        806
+
+$`School enrollment`
+# A tibble: 4 × 2
+  SCH                                            count
+  &lt;fct&gt;                                          &lt;int&gt;
+1 N/A (less than 3 years old)                     5501
+2 Yes, private school or college or home school   8337
+3 No, has not attended in the last 3 months     158139
+4 Yes, public school or public college           35980
+
+$`Educational attainment`
+# A tibble: 17 × 2
+   SCHL                                           count
+   &lt;fct&gt;                                          &lt;int&gt;
+ 1 Regular high school diploma                    44097
+ 2 Professional degree beyond a bachelor's degree  2719
+ 3 1 or more years of college credit, no degree   25066
+ 4 Master's degree                                12319
+ 5 Grade 7                                         2910
+ 6 Associate's degree                             14933
+ 7 N/A (less than 3 years old)                     5501
+ 8 Bachelor's degree                              26616
+ 9 Doctorate degree                                2031
+10 Grade 11                                        6203
+11 GED or alternative credential                   9116
+12 Grade 9                                         4863
+13 12th grade - no diploma                         3607
+14 Grade 10                                        5548
+15 Grade 8                                         4046
+16 Some college, but less than 1 year             13029
+17 &lt;NA&gt;                                           25353
+
+$Sex
+# A tibble: 2 × 2
+  SEX     count
+  &lt;fct&gt;   &lt;int&gt;
+1 Male   100347
+2 Female 107610
+
+$YEAR
+# A tibble: 4 × 2
+  YEAR  count
+  &lt;fct&gt; &lt;int&gt;
+1 2021  49647
+2 2022  51580
+3 2023  53020
+4 2024  53710</code></pre>
+</div>
+</div>
+</section>
+<section id="graphical-summaries" class="level2">
+<h2 class="anchored" data-anchor-id="graphical-summaries">Graphical Summaries</h2>
+<p>This function, like the last, is an addition to the normal <code>plot()</code> function, which only activates when something of data type “census” is provided. It recieves the census data, as well as the name of one numeric and one categorical column, and makes a <code>ggplot()</code> boxplot based on those arguments.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>plot.census <span class="ot">&lt;-</span> <span class="cf">function</span>(data, num_var, cat_var){</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Read in label list for final plot printing</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  label_list <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/pumsVars.rds"</span>)<span class="sc">$</span>pums2021</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Extract numeric and categorical labels from label_list</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Again, checking for YEAR specifically</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  num_name <span class="ot">&lt;-</span> label_list[[num_var]][[<span class="st">"label"</span>]]</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  cat_name <span class="ot">&lt;-</span> <span class="cf">if</span>(cat_var <span class="sc">==</span> <span class="st">"YEAR"</span>){<span class="st">"Year"</span>} </span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>              <span class="cf">else</span>{label_list[[cat_var]][[<span class="st">"label"</span>]]}</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Plotting, specifying weights (PWGTP) from census data, and axis titles from label_list</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(data, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">get</span>(cat_var), <span class="at">y =</span> <span class="fu">get</span>(num_var), <span class="at">weight =</span> PWGTP))<span class="sc">+</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>()<span class="sc">+</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="fu">paste0</span>(num_name, <span class="st">" by "</span>, cat_name),</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">x =</span> cat_name, </span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> num_name)</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(test, <span class="st">"JWMNP"</span>, <span class="st">"SCHL"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="558Proj1_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(test, <span class="fu">aes</span>(<span class="at">x =</span> YEAR, <span class="at">y =</span> GASP, <span class="at">weight =</span> PWGTP))<span class="sc">+</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="558Proj1_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
