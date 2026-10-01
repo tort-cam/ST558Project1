@@ -16,6 +16,7 @@ library(httr)
 library(jsonlite)
 library(tidyverse)
 library(lubridate)
+library(scales)
 
 APIkey <- "3e4e9dd9b93b8546b5de301ae8c11506545540b9"
 
@@ -212,12 +213,14 @@ pums2 <- function(year = 2024,
 Trying it out! More columns slows it down, but it works!
 
 ```{r}
-attempt <- pums2(year = 2022, 
+PUMS2022 <- pums2(year = 2022, 
                  num_vars = c("AGEP", "JWDP", "PWGTP"), 
                  cat_vars = c("SCHL", "SEX"), 
                  geo_level = "state", 
                  geo_value = "05", 
                  API_key = APIkey)
+
+PUMS2022
 ```
 
 #### Combining years
@@ -263,7 +266,7 @@ combo <- function(years = c(2021:2024),
 Testing it out - Functional!
 
 ```{r}
-test <- combo(years = c(2021: 2024), 
+fourYears <- combo(years = c(2021: 2024), 
               num_vars = c("AGEP", "GASP", "GRPIP", "JWMNP", "PWGTP"),
               catlist <- c("FER", "HHL", "SCH", "SCHL", "SEX"),
               API_key = APIkey)
@@ -327,14 +330,11 @@ summary.census <- function(data,
     } else {
     name <- label_list[[var]][["label"]]
     }
-    
     temp <- data |>
       group_by(.data[[var]])|>
       summarise(count = n())
     out_list[[name]] <- temp
-    
   }
-
     return(out_list)    
 }
 ```
@@ -342,7 +342,7 @@ summary.census <- function(data,
 Let's test out the summary! In Rstudio it's hard to interpret the output, but upon rendering to html it looks good!
 
 ```{r}
-summarized_list <- summary(test)
+summarized_list <- summary(fourYears)
 summarized_list
 ```
 
@@ -352,6 +352,10 @@ This function, like the last, is an addition to the normal `plot()` function, wh
 
 ```{r}
 plot.census <- function(data, num_var, cat_var){
+  
+  ## Make sure both provided variables are in provided df
+  if (!(num_var %in% colnames(data)) || !(cat_var %in% colnames(data))){
+    stop("One or more provided variables not found in data")}
   
   ## Read in label list for final plot printing
   label_list <- readRDS("data/pumsVars.rds")$pums2021
@@ -368,16 +372,76 @@ plot.census <- function(data, num_var, cat_var){
     labs(title = paste0(num_name, " by ", cat_name),
          x = cat_name, 
          y = num_name)
-}
+  }
+```
+
+Testing out `plot()`
+
+```{r}
+plot(fourYears, "JWMNP", "SEX")
+```
+
+## Investigation
+
+Here, I am going to explore commute time! I'll look at changes by home language and sex.
+
+```{r}
+PUMS2023 <- pums2(year = 2023, 
+                 num_vars = c("AGEP", "JWMNP", "GASP"), 
+                 cat_vars = c("SEX", "HHL"), 
+                 geo_level = "division", 
+                 geo_value = "9", 
+                 API_key = APIkey)
 ```
 
 ```{r}
-plot(test, "JWMNP", "SCHL")
+summary2023<- summary(PUMS2023, 
+                      num_vars = c("AGEP", "JWMNP", "GASP"), 
+                      cat_vars = c("HHL"))
+
+commute_language_2023 <- plot(PUMS2023, "JWMNP", "HHL")
+commute_sex_2023 <- plot(PUMS2023, "JWMNP", "SEX")
+
+summary2023
 ```
+
+This table shows us that the weighted mean travel time is \~11 minutes and 30 seconds, with a very high standard deviation of more than 20 minutes. We also see here that while more households are "English Only" than any other, there are a significant portion of Spanish and Asian & Pacific Island -language households as well.
 
 ```{r}
-ggplot(test, aes(x = YEAR, y = GASP, weight = PWGTP))+
-  geom_boxplot()
-
-
+commute_language_2023
 ```
+
+As a first look, these make sense. There are a lot of zeroes (anyone who doesn't commute), and because of the hard limit at 0, this data is pretty skewed.
+
+A couple issues with this plot (and with commute_sex_2023 not shown here):
+
+1.  There are way too many zeroes to get a good idea of statistics among commuters
+2.  The range of values is huge
+3.  Some of the category names are a bit too long
+4.  I would really like to have mean on the figure too
+
+To deal with these issues, I am going to subset to only nonzero values, set a `ylim()` on the figure, use `label_wrap()` on the category names, and use `stat_summary()` to add in the group means
+
+```{r}
+commute_language_2023 <- plot(filter(PUMS2023,JWMNP > 0), "JWMNP", "HHL")
+commute_language_2023+
+  scale_x_discrete(labels = scales::label_wrap(10))+
+  ylim(0, 50)+
+  stat_summary(fun = "mean", color = "forestgreen")
+```
+
+That's much better! It looks like median commute times are pretty standard between demographic groups (or at least this proxy for demographic group), but there is a little variation between group means.
+
+Now, looking at commute time by sex, I am going to enact some of the same fixes.
+
+```{r}
+commute_sex_2023 <- plot(filter(PUMS2023,JWMNP > 0), "JWMNP", "SEX")
+
+commute_sex_2023+
+  ylim(0, 100)+
+  stat_summary(fun = "mean", color = "forestgreen")
+```
+
+Here, we can see that on average, men have a longer commute, but again the medians are pretty consistent. Of note, the whisker above the men's boxplot extends \~10 minutes higher.
+
+These plots and tables were pretty informative! Here it seems like on average, men have a slightly longer commute, but with a nearly identical overall commute time distribution to women. In addition, we see that of the three most common household language groups (English, Spanish, Asian & Pacific Island), on average, residents of Asian & Pacific Island -language households have slightly longer commutes.
