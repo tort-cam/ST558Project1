@@ -3,8 +3,25 @@ title: "ST 558 Project 1"
 format: html
 author: Cameron Mullaney
 date: today
-editor: visual
 ---
+
+In this file, there will be a couple major tasks, split up into sections.
+
+Part I will cover:
+
+- Querying the PUMS API
+
+- Writing to a .rds file
+
+- Creating helper functions to assist with data formatting and handling time values
+
+- Creating functions to more efficiently query the PUMS API
+
+Part II will cover:
+
+- Writing functions for numeric and visual summarizing of PUMS data
+
+- Using those functions to investigate and find trends in the 2023 PUMS data
 
 # Setup
 
@@ -271,6 +288,7 @@ fourYears <- combo(years = c(2021: 2024),
               catlist <- c("FER", "HHL", "SCH", "SCHL", "SEX"),
               API_key = APIkey)
 
+fourYears
 ```
 
 # Part II: Writing Generic Functions for Summarizing
@@ -381,9 +399,13 @@ Testing out `plot()`
 plot(fourYears, "JWMNP", "SEX")
 ```
 
+That looks alright! Because the function produces a ggplot object, I have the option to edit it further afterwards, which will happen below...
+
 ## Investigation
 
-Here, I am going to explore commute time! I'll look at changes by home language and sex.
+Here, I am going to explore commute time in the "Pacific / West" division.
+
+I'll look at changes by home language and sex.
 
 ```{r}
 PUMS2023 <- pums2(year = 2023, 
@@ -445,3 +467,5 @@ commute_sex_2023+
 Here, we can see that on average, men have a longer commute, but again the medians are pretty consistent. Of note, the whisker above the men's boxplot extends \~10 minutes higher.
 
 These plots and tables were pretty informative! Here it seems like on average, men have a slightly longer commute, but with a nearly identical overall commute time distribution to women. In addition, we see that of the three most common household language groups (English, Spanish, Asian & Pacific Island), on average, residents of Asian & Pacific Island -language households have slightly longer commutes.
+
+That's all for Project 1!
